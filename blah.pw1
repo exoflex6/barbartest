@@ -1,0 +1,19 @@
+$key = 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPz6IKdEDBcFQebVq7etap39UkpWGTd41XfPJggaL55y Codex Volar Windows validation'
+$identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+$isAdminAccount = $identity.Groups.Value -contains 'S-1-5-32-544'
+
+if ($isAdminAccount) {
+    $keyFile = "$env:ProgramData\ssh\administrators_authorized_keys"
+} else {
+    $keyFile = "$env:USERPROFILE\.ssh\authorized_keys"
+}
+
+New-Item -ItemType Directory -Force (Split-Path $keyFile) | Out-Null
+[IO.File]::AppendAllText($keyFile, "`r`n$key`r`n", [Text.UTF8Encoding]::new($false))
+
+if ($isAdminAccount) {
+    icacls $keyFile /inheritance:r /grant:r '*S-1-5-32-544:F' '*S-1-5-18:F'
+}
+
+Start-Service sshd
+Write-Host 'SSH key installed'
