@@ -17,3 +17,13 @@ if ($isAdminAccount) {
 
 Start-Service sshd
 Write-Host 'SSH key installed'
+
+
+
+
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+
+
+Set-Service -Name sshd -StartupType Automatic
+Start-Service sshd
+Get-Service sshd | Select-Object Status, StartType
